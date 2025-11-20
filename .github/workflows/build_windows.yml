@@ -9,38 +9,48 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
+      # 1. 检出源码
       - name: Checkout qBittorrent
         uses: actions/checkout@v3
 
+      # 2. 安装 MSVC 环境
       - name: Install MSVC Dev Cmd
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
 
+      # 3. 安装依赖
       - name: Install dependencies
         run: |
           choco install ninja cmake git -y
           git clone https://github.com/arvidn/libtorrent.git
           cd libtorrent
+          git apply ../libtorrent_multi_interface.patch --check
           git apply ../libtorrent_multi_interface.patch
           cd ..
 
+      # 4. 配置 CMake
       - name: Configure CMake
         run: |
           cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release
 
+      # 5. 编译
       - name: Build
         run: cmake --build build --config Release
 
+      # 6. 上传构建产物
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: qbittorrent.exe
+          name: qbittorrent-multi-interface.exe
           path: build/bin/qbittorrent.exe
 
+      # 7. 发布到 Release
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: build/bin/qbittorrent.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+ 
+
