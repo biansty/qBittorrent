@@ -52,5 +52,3 @@ jobs:
           files: build/bin/qbittorrent.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
- 
-
